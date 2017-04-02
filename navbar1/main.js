@@ -1,7 +1,7 @@
 window.addEventListener('load', pageInit);
 
 function pageInit() {
-
+    "use strict";
     var box1 = document.querySelector('#box1');
     window.bottomrect = box1.getBoundingClientRect().bottom;
     window.distanceToBottom = window.innerHeight - bottomrect;
@@ -12,13 +12,38 @@ function pageInit() {
 
 
 
-    // now we need state control, in particular:
+    window.boxes = [
+        {
+            id: '#box1',
+            dom: document.querySelector('#box1'),
+            state: "idle"   // could be: goingdown down goingup up
+        },
+        
+        {
+            id: '#box2',
+            dom: document.querySelector('#box2'),
+            state: "idle"
+        },
+        
+        {
+            id: '#box3',
+            dom: document.querySelector('#box3'),
+            state: "idle"
+        },
+        
+        {
+            id: '#box4',
+            dom: document.querySelector('#box4'),
+            state: "idle"
+        },
+        
+        {
+            id: '#box5',
+            dom: document.querySelector('#box5'),
+            state: "idle"
+        }
+    ];
 
-    
-    // going down    
-    // down
-    // going up
-    // up
 
 
 
@@ -27,34 +52,25 @@ function pageInit() {
 
 
 
-
-
-
-    window.addEventListener('keydown', function (e) {
-        // if (e.key == 'm') {
-        //     for (var i = 0; i < 5; i++) {
-        //         boxHovered("#box" + (i + 1));
-        //     }
-        // }
-
+    window.addEventListener('keydown', function keydown (e) {
         if (e.key == 'k') {
-            shutBoxDown(0);
+            shutBoxDown(boxes[0]);
         }
 
         if (e.key == 'i') {
-            shutBoxDown(1);
+            shutBoxDown(boxes[1]);
         }
 
         if (e.key == 'p') {
-            shutBoxDown(2);
+            shutBoxDown(boxes[2]);
         }
 
         if (e.key == 'u') {
-            shutBoxDown(4);
+            shutBoxDown(boxes[4]);
         }
 
         if (e.key == 'o') {
-            shutBoxDown(3);
+            shutBoxDown(boxes[3]);
         }
     });
 
@@ -71,23 +87,25 @@ function pageInit() {
 
 
     // registering hover events
-    var boxes = document.querySelectorAll('nav > div');
     for (var i = 0; i < boxes.length; i++) {
-        boxes[i].addEventListener('mouseenter', boxHovered);
-        boxes[i].addEventListener('mouseleave', boxUnhovered);
+        boxes[i].dom.addEventListener('mouseenter', boxHovered);
+        boxes[i].dom.addEventListener('mouseleave', boxUnhovered);
     }
 }
 
 function boxUnhovered(e) {
+    "use strict";
+    
     for(var i = 0; i < 5; i++) {
         var id = 'box' + (i+1);
         if(e.currentTarget.id === id) {
-            shutBoxDown(i);
+            shutBoxDown(boxes[i]);
         }
     }
 }
 
 function boxHovered(e) {
+    "use strict";
 
     anime.remove(e.currentTarget);
     anime({
@@ -104,13 +122,15 @@ function boxHovered(e) {
     for(var i = 0; i < 5; i++) {
         var id = 'box' + (i+1);
         if(e.currentTarget.id !== id) {
-            shutBoxDown(i);
+            shutBoxDown(boxes[i]);
         }
     }
 }
 
-function shutBoxDown(index) {
-    if (index === 0) {
+function shutBoxDown(box) {
+    "use strict";
+    
+    if (box.id === '#box1') {
         anime.remove('#box1');
         // where's the end of the screen?
 
@@ -129,7 +149,7 @@ function shutBoxDown(index) {
         });
     }
 
-    if (index === 1) {
+    if (box.id === '#box2') {
         anime.remove('#box2');
         // where's the end of the screen?
 
@@ -154,7 +174,7 @@ function shutBoxDown(index) {
         });
     }
 
-    if (index === 2) {
+    if (box.id === '#box3') {
         anime.remove('#box3');
         // where's the end of the screen?
 
@@ -171,7 +191,7 @@ function shutBoxDown(index) {
         });
     }
 
-    if (index === 3) {
+    if (box.id === '#box4') {
         anime.remove('#box4');
         // where's the end of the screen?
 
@@ -192,7 +212,7 @@ function shutBoxDown(index) {
         });
     }
 
-    if (index === 4) {
+    if (box.id === '#box5') {
         anime.remove('#box5');
         // where's the end of the screen?
 
