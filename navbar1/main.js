@@ -9,14 +9,12 @@ function pageInit() {
 
 
 
-
-
-
+    // @state - possible values: idle goingdown down goingup up
     window.boxes = [
         {
             id: '#box1',
             dom: document.querySelector('#box1'),
-            state: "idle"   // could be: goingdown down goingup up
+            state: "idle"   
         },
         
         {
