@@ -46,10 +46,6 @@ function pageInit() {
 
 
 
-
-
-
-
     window.addEventListener('keydown', function keydown(e) {
         if (e.key == 'k') {
             shutBoxDown(boxes[0]);
@@ -86,9 +82,9 @@ function boxUnhovered(e) {
     for (var i = 0; i < 5; i++) {
         var id = 'box' + (i + 1);
         if (e.currentTarget.id === id) {
-            if(boxes[i].state == 'goingdown') continue;
-            if(boxes[i].state == 'down') continue;                        
-            if(boxes[i].state == 'goingup') continue;
+            if (boxes[i].state == 'goingdown') continue;
+            if (boxes[i].state == 'down') continue;
+            if (boxes[i].state == 'goingup') continue;
             shutBoxDown(boxes[i]);
         }
     }
@@ -100,32 +96,52 @@ function boxHovered(e) {
     for (var i = 0; i < 5; i++) {
         var id = 'box' + (i + 1);
         if (e.currentTarget.id !== id) {
-            if(boxes[i].state == 'goingdown') continue;
-            if(boxes[i].state == 'down') continue;
+            if (boxes[i].state == 'goingdown') continue;
+            if (boxes[i].state == 'down') continue;
             shutBoxDown(boxes[i]);
             boxes[i].state = 'goingdown';
         }
         if (e.currentTarget.id === id) {
             //if(boxes[i].state == 'goingdown') continue;
-            if(boxes[i].state == 'goingup') continue;
-            if(boxes[i].state == 'up') continue;
+            if (boxes[i].state == 'goingup') continue;
+            if (boxes[i].state == 'up') continue;
 
             boxes[i].state = 'goingup';
 
             anime.remove(e.currentTarget);
-            anime({
-                targets: e.currentTarget,
-                translateY: 0,
-                translateX: 0,
-                scale: 1.2,
-                transformOrigin: { value: '50% 50%' },
-                rotate: -30,
-                autoplay: true,
-                duration: 2000,
-                complete: function(index) {
-                    return function () { boxes[index].state = 'up'; };
-                }(i)
-            });
+            if (e.currentTarget.id === "box1" || e.currentTarget.id === "box3") {
+                anime({
+                    targets: e.currentTarget,
+                    translateY: 0,
+                    translateX: 0,
+                    scale: 1.2,
+                    rotate: -30,
+                    autoplay: true,
+                    duration: 2000,
+                    complete: function (index) {
+                        return function () {
+                            boxes[index].state = 'up';
+                        };
+                    }(i)
+                });
+            } else {
+                anime({
+                    targets: e.currentTarget,
+                    translateY: 0,
+                    translateX: 0,
+                    scale: 1.2,
+                    transformOrigin: { value: '50% 50%', easing: 'easeInOutCubic' },
+                    rotate: -30,
+                    autoplay: true,
+                    duration: 2000,
+                    complete: function (index) {
+                        return function () {
+                            boxes[index].state = 'up';
+                            document.querySelector(boxes[index].id).style.transformOrigin = '50% 50%';
+                        };
+                    }(i)
+                });
+            }
         }
     }
 }
@@ -136,7 +152,6 @@ function shutBoxDown(box) {
     if (box.id === '#box1') {
         anime.remove('#box1');
         // where's the end of the screen?
-
         anime({
             targets: ['#box1'],
             translateY: [
@@ -148,8 +163,9 @@ function shutBoxDown(box) {
                 { value: 180, duration: 600, delay: 500, easing: 'easeInOutCubic' }
             ],
             autoplay: true,
-            duration: 2000,
-            complete: function () { box.state = 'down'; }
+            complete: function () {
+                box.state = 'down';
+            }
         });
     }
 
@@ -164,7 +180,7 @@ function shutBoxDown(box) {
                 { value: distanceToBottom, duration: 600, easing: 'easeInCubic' },
             ],
             transformOrigin: [
-                '0% 100%', '0% 100%'
+                { value: ['0% 100%', '0% 100%'], easing: 'easeInCubic' }
             ],
             rotate: [
                 { value: 0, duration: 600, easing: 'easeOutCubic' },
@@ -175,8 +191,11 @@ function shutBoxDown(box) {
             ],
             autoplay: true,
             duration: 2000,
-            complete: function () { box.state = 'down'; }
-            
+            complete: function () {
+                box.state = 'down';
+                document.querySelector(box.id).style.transformOrigin = '0% 100%';
+            }
+
         });
     }
 
@@ -194,8 +213,11 @@ function shutBoxDown(box) {
                 { value: -270, duration: 900, easing: 'easeOutCubic' }
             ],
             autoplay: true,
-            complete: function () { box.state = 'down'; }
-            
+            complete: function () {
+                box.state = 'down';
+                document.querySelector(box.id).style.transformOrigin = '50% 50%';
+            }
+
         });
     }
 
@@ -217,8 +239,11 @@ function shutBoxDown(box) {
             ],
             autoplay: true,
             duration: 2000,
-            complete: function () { box.state = 'down'; }
-            
+            complete: function () {
+                box.state = 'down';
+                document.querySelector(box.id).style.transformOrigin = '0% 100%';
+            }
+
         });
     }
 
@@ -239,7 +264,7 @@ function shutBoxDown(box) {
                 { value: [boxheight, boxheight], duration: 300 },
             ],
             transformOrigin: [
-                { value: '50% 50%', duration: 700, easing: 'easeInCubic' },
+                { value: ['50% 50%', '50% 50%'], duration: 700, easing: 'easeInCubic' },
                 { value: ['0% 0%', '0% 0%'], duration: 300, easing: 'easeInCubic' },
                 { value: ['0% 0%', '0% 0%'], duration: 200, easing: 'easeInCubic' },
                 { value: ['0% 100%', '0% 100%'], duration: 300, easing: 'easeInCubic' },
@@ -253,8 +278,11 @@ function shutBoxDown(box) {
             ],
             autoplay: true,
             duration: 700,
-            complete: function () { box.state = 'down'; }
-            
+            complete: function () {
+                box.state = 'down';
+                document.querySelector(box.id).style.transformOrigin = '0% 100%';
+            }
+
         });
     }
 }
