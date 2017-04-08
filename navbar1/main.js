@@ -8,7 +8,6 @@ function pageInit() {
     window.boxheight = box1.clientHeight;
 
 
-
     // @state - possible values: idle goingdown down goingup up
     window.boxes = [
         {
@@ -76,6 +75,8 @@ function pageInit() {
     }
 }
 
+
+// the boxes that are "up" shold go down
 function boxUnhovered(e) {
     "use strict";
 
@@ -86,6 +87,7 @@ function boxUnhovered(e) {
             if (boxes[i].state == 'down') continue;
             if (boxes[i].state == 'goingup') continue;
             shutBoxDown(boxes[i]);
+            boxes[i].state = 'goingdown';            
         }
     }
 }
@@ -99,7 +101,7 @@ function boxHovered(e) {
             if (boxes[i].state == 'goingdown') continue;
             if (boxes[i].state == 'down') continue;
             shutBoxDown(boxes[i]);
-            boxes[i].state = 'goingdown';
+            boxes[i].state = 'goingdown';        
         }
         if (e.currentTarget.id === id) {
             //if(boxes[i].state == 'goingdown') continue;
@@ -277,7 +279,6 @@ function shutBoxDown(box) {
                 { value: [-80, -90], duration: 200, easing: 'easeInCubic' },
             ],
             autoplay: true,
-            duration: 700,
             complete: function () {
                 box.state = 'down';
                 document.querySelector(box.id).style.transformOrigin = '0% 100%';
