@@ -17,44 +17,68 @@
             height: 100vh;
             width:  100vw;
             overflow: hidden;
+            background: #eee;
         }
 
         nav {
             display: block;
-            left: 17.5vw;
-            width: calc(65vw);
+            left: 15vw;
+            width: calc(14vw * 5);
             position: absolute;
-            top: 10%;
-            height: 13vw;
-            background: gray;
+            top: 15%;
+            height: 14vw;
+            background: #ddd;
+            box-shadow: inset 0 0 1.25vw #bbb;
         }
 
         nav > div {
             position: absolute;
-            height: 13vw;
-            width: 13vw;
+            height: 14vw;
+            width: 14vw;
             top: 0;
+            cursor: pointer;
+            transition: box-shadow .2s;
+        }
 
-            background: url('https://s-media-cache-ak0.pinimg.com/736x/4c/d9/0e/4cd90e08c7ae352b16c555962cba0aa2.jpg');
-            background-size: cover;
+        nav > div:hover {
+            box-shadow: 0 0 1.7vw #555;
         }
 
         #box1 {
+            background: url('images/img1.jpg');
+            background-size: cover;
             left: 0;
         }
         #box2 {
-            left: 13vw;            
+            background: url('images/img2.jpg');
+            background-size: cover;
+            left: 14vw;            
         }
         #box3 {
-            left: 26vw;            
-            
+            background: url('images/img3.jpg');
+            background-size: cover;
+            left: 28vw;                        
         }
         #box4 {
-            left: 39vw;            
-            
+            background: url('images/img4.jpg');
+            background-size: cover;
+            left: calc(42vw - 1px);         
         }
         #box5 {
-            left: 52vw;          
+            background: url('images/img5.jpg');
+            background-size: cover;
+            left: 56vw;         
+        }
+
+        .overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transition: background .3s;
+        }
+
+        .overlay.unactive {
+            background: rgba(0,0,0, 0.4);
         }
 
     </style>
@@ -62,11 +86,21 @@
 <body>
 
     <nav>
-        <div id="box1"></div>
-        <div id="box2"></div>
-        <div id="box3"></div>
-        <div id="box4"></div>
-        <div id="box5"></div>
+        <div id="box1">
+            <div class="overlay"></div>
+        </div>
+        <div id="box2">
+            <div class="overlay"></div>
+        </div>
+        <div id="box3">
+            <div class="overlay"></div>
+        </div>
+        <div id="box4">
+            <div class="overlay"></div>
+        </div>
+        <div id="box5">
+            <div class="overlay"></div>
+        </div>
     </nav>
 
 </body>

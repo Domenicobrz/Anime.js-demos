@@ -86,8 +86,8 @@ function boxUnhovered(e) {
             if (boxes[i].state == 'goingdown') continue;
             if (boxes[i].state == 'down') continue;
             if (boxes[i].state == 'goingup') continue;
-            shutBoxDown(boxes[i]);
-            boxes[i].state = 'goingdown';            
+            shutBoxDown(boxes[i], e.currentTarget);
+            boxes[i].state = 'goingdown';
         }
     }
 }
@@ -101,7 +101,7 @@ function boxHovered(e) {
             if (boxes[i].state == 'goingdown') continue;
             if (boxes[i].state == 'down') continue;
             shutBoxDown(boxes[i]);
-            boxes[i].state = 'goingdown';        
+            boxes[i].state = 'goingdown';
         }
         if (e.currentTarget.id === id) {
             //if(boxes[i].state == 'goingdown') continue;
@@ -111,15 +111,21 @@ function boxHovered(e) {
             boxes[i].state = 'goingup';
 
             anime.remove(e.currentTarget);
+
+            var element_reference = e.currentTarget;
+
             if (e.currentTarget.id === "box1" || e.currentTarget.id === "box3") {
                 anime({
                     targets: e.currentTarget,
                     translateY: 0,
                     translateX: 0,
-                    scale: 1.2,
+                    scale: 1.1,
                     rotate: -30,
                     autoplay: true,
                     duration: 2000,
+                    begin: function () {
+                        element_reference.children[0].className = "overlay";
+                    },
                     complete: function (index) {
                         return function () {
                             boxes[index].state = 'up';
@@ -131,11 +137,14 @@ function boxHovered(e) {
                     targets: e.currentTarget,
                     translateY: 0,
                     translateX: 0,
-                    scale: 1.2,
-                    transformOrigin: { value: '50% 50%', easing: 'easeInOutCubic' },
+                    scale: 1.1,
+                    transformOrigin: { value: '50% 50%', easing: 'easeInOutCubic', duration: 500 },
                     rotate: -30,
                     autoplay: true,
                     duration: 2000,
+                    begin: function () {
+                        element_reference.children[0].className = "overlay";
+                    },
                     complete: function (index) {
                         return function () {
                             boxes[index].state = 'up';
@@ -165,6 +174,9 @@ function shutBoxDown(box) {
                 { value: 180, duration: 600, delay: 500, easing: 'easeInOutCubic' }
             ],
             autoplay: true,
+            begin: function () {
+                document.querySelector('#box1 div').className = "overlay unactive";
+            },
             complete: function () {
                 box.state = 'down';
             }
@@ -193,6 +205,9 @@ function shutBoxDown(box) {
             ],
             autoplay: true,
             duration: 2000,
+            begin: function () {
+                document.querySelector('#box2 div').className = "overlay unactive";                
+            },
             complete: function () {
                 box.state = 'down';
                 document.querySelector(box.id).style.transformOrigin = '0% 100%';
@@ -215,6 +230,9 @@ function shutBoxDown(box) {
                 { value: -270, duration: 900, easing: 'easeOutCubic' }
             ],
             autoplay: true,
+            begin: function () {
+                document.querySelector('#box3 div').className = "overlay unactive";                
+            },
             complete: function () {
                 box.state = 'down';
                 document.querySelector(box.id).style.transformOrigin = '50% 50%';
@@ -236,11 +254,15 @@ function shutBoxDown(box) {
                 { value: '0% 100%', duration: 0, easing: 'easeInCubic' },
                 { value: '0% 100%', duration: 300, easing: 'easeOutCubic' }
             ],
+            scaleX: [1.01],
             rotate: [
                 { value: 90, duration: 2600, elasticity: 600 },
             ],
             autoplay: true,
             duration: 2000,
+            begin: function () {
+                document.querySelector('#box4 div').className = "overlay unactive";
+            },
             complete: function () {
                 box.state = 'down';
                 document.querySelector(box.id).style.transformOrigin = '0% 100%';
@@ -279,6 +301,9 @@ function shutBoxDown(box) {
                 { value: [-80, -90], duration: 200, easing: 'easeInCubic' },
             ],
             autoplay: true,
+            begin: function () {
+                document.querySelector('#box5 div').className = "overlay unactive";
+            },
             complete: function () {
                 box.state = 'down';
                 document.querySelector(box.id).style.transformOrigin = '0% 100%';
