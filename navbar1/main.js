@@ -8,6 +8,7 @@ function pageInit() {
     window.boxheight = box1.clientHeight;
 
 
+
     // @state - possible values: idle goingdown down goingup up
     window.boxes = [
         {
@@ -125,6 +126,8 @@ function boxHovered(e) {
                     duration: 2000,
                     begin: function () {
                         element_reference.children[0].className = "overlay";
+                        element_reference.children[1].className = "h2hov";                        
+                        element_reference.children[2].className = "h2wow active";   
                     },
                     complete: function (index) {
                         return function () {
@@ -144,6 +147,8 @@ function boxHovered(e) {
                     duration: 2000,
                     begin: function () {
                         element_reference.children[0].className = "overlay";
+                        element_reference.children[1].className = "h2hov";                        
+                        element_reference.children[2].className = "h2wow active";                        
                     },
                     complete: function (index) {
                         return function () {
@@ -176,6 +181,8 @@ function shutBoxDown(box) {
             autoplay: true,
             begin: function () {
                 document.querySelector('#box1 div').className = "overlay unactive";
+                document.querySelector('#box1').children[1].className = "h2hov active";                        
+                document.querySelector('#box1').children[2].className = "h2wow";   
             },
             complete: function () {
                 box.state = 'down';
@@ -206,7 +213,9 @@ function shutBoxDown(box) {
             autoplay: true,
             duration: 2000,
             begin: function () {
-                document.querySelector('#box2 div').className = "overlay unactive";                
+                document.querySelector('#box2 div').className = "overlay unactive"; 
+                document.querySelector('#box2').children[1].className = "h2hov active";                        
+                document.querySelector('#box2').children[2].className = "h2wow";                  
             },
             complete: function () {
                 box.state = 'down';
@@ -231,7 +240,9 @@ function shutBoxDown(box) {
             ],
             autoplay: true,
             begin: function () {
-                document.querySelector('#box3 div').className = "overlay unactive";                
+                document.querySelector('#box3 div').className = "overlay unactive";
+                document.querySelector('#box3').children[1].className = "h2hov active";                        
+                document.querySelector('#box3').children[2].className = "h2wow";                   
             },
             complete: function () {
                 box.state = 'down';
@@ -262,7 +273,8 @@ function shutBoxDown(box) {
             duration: 2000,
             begin: function () {
                 document.querySelector('#box4 div').className = "overlay unactive";
-            },
+                document.querySelector('#box4').children[1].className = "h2hov active";                        
+                document.querySelector('#box4').children[2].className = "h2wow";               },
             complete: function () {
                 box.state = 'down';
                 document.querySelector(box.id).style.transformOrigin = '0% 100%';
@@ -303,7 +315,8 @@ function shutBoxDown(box) {
             autoplay: true,
             begin: function () {
                 document.querySelector('#box5 div').className = "overlay unactive";
-            },
+                document.querySelector('#box5').children[1].className = "h2hov active";                        
+                document.querySelector('#box5').children[2].className = "h2wow";               },
             complete: function () {
                 box.state = 'down';
                 document.querySelector(box.id).style.transformOrigin = '0% 100%';
