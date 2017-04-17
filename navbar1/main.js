@@ -7,66 +7,38 @@ function pageInit() {
     window.distanceToBottom = window.innerHeight - bottomrect;
     window.boxheight = box1.clientHeight;
 
-
-
-    // @state - possible values: idle goingdown down goingup up
+    
     window.boxes = [
-        {
-            id: '#box1',
-            dom: document.querySelector('#box1'),
-            state: "idle"
-        },
-
-        {
-            id: '#box2',
-            dom: document.querySelector('#box2'),
-            state: "idle"
-        },
-
-        {
-            id: '#box3',
-            dom: document.querySelector('#box3'),
-            state: "idle"
-        },
-
-        {
-            id: '#box4',
-            dom: document.querySelector('#box4'),
-            state: "idle"
-        },
-
-        {
-            id: '#box5',
-            dom: document.querySelector('#box5'),
-            state: "idle"
-        }
+        new Box('#box1'),
+        new Box('#box2'),
+        new Box('#box3'),
+        new Box('#box4'),
+        new Box('#box5')
     ];
 
 
+    // used for debugging
+    // window.addEventListener('keydown', function keydown(e) {
+    //     if (e.key == 'k') {
+    //         shutBoxDown(boxes[0]);
+    //     }
 
+    //     if (e.key == 'i') {
+    //         shutBoxDown(boxes[1]);
+    //     }
 
+    //     if (e.key == 'p') {
+    //         shutBoxDown(boxes[2]);
+    //     }
 
-    window.addEventListener('keydown', function keydown(e) {
-        if (e.key == 'k') {
-            shutBoxDown(boxes[0]);
-        }
+    //     if (e.key == 'u') {
+    //         shutBoxDown(boxes[4]);
+    //     }
 
-        if (e.key == 'i') {
-            shutBoxDown(boxes[1]);
-        }
-
-        if (e.key == 'p') {
-            shutBoxDown(boxes[2]);
-        }
-
-        if (e.key == 'u') {
-            shutBoxDown(boxes[4]);
-        }
-
-        if (e.key == 'o') {
-            shutBoxDown(boxes[3]);
-        }
-    });
+    //     if (e.key == 'o') {
+    //         shutBoxDown(boxes[3]);
+    //     }
+    // });
 
 
     // registering hover events
@@ -76,6 +48,14 @@ function pageInit() {
     }
 }
 
+/**
+ *  @param Number state         - possible values: idle goingdown down goingup up
+ */
+function Box(id) {
+    this.id = id;
+    this.dom = document.querySelector(id);
+    this.state = 'idle';
+}
 
 // the boxes that are "up" shold go down
 function boxUnhovered(e) {
@@ -125,9 +105,7 @@ function boxHovered(e) {
                     autoplay: true,
                     duration: 2000,
                     begin: function () {
-                        element_reference.children[0].className = "overlay";
-                        element_reference.children[1].className = "h2hov";                        
-                        element_reference.children[2].className = "h2wow active";   
+                        riseUpAssignClasses(element_reference);
                     },
                     complete: function (index) {
                         return function () {
@@ -146,9 +124,7 @@ function boxHovered(e) {
                     autoplay: true,
                     duration: 2000,
                     begin: function () {
-                        element_reference.children[0].className = "overlay";
-                        element_reference.children[1].className = "h2hov";                        
-                        element_reference.children[2].className = "h2wow active";                        
+                        riseUpAssignClasses(element_reference);
                     },
                     complete: function (index) {
                         return function () {
@@ -167,7 +143,7 @@ function shutBoxDown(box) {
 
     if (box.id === '#box1') {
         anime.remove('#box1');
-        // where's the end of the screen?
+        
         anime({
             targets: ['#box1'],
             translateY: [
@@ -180,9 +156,7 @@ function shutBoxDown(box) {
             ],
             autoplay: true,
             begin: function () {
-                document.querySelector('#box1 div').className = "overlay unactive";
-                document.querySelector('#box1').children[1].className = "h2hov active";                        
-                document.querySelector('#box1').children[2].className = "h2wow";   
+                shutDownAssignClasses('#box1');
             },
             complete: function () {
                 box.state = 'down';
@@ -192,7 +166,6 @@ function shutBoxDown(box) {
 
     if (box.id === '#box2') {
         anime.remove('#box2');
-        // where's the end of the screen?
 
         anime({
             targets: ['#box2'],
@@ -213,9 +186,7 @@ function shutBoxDown(box) {
             autoplay: true,
             duration: 2000,
             begin: function () {
-                document.querySelector('#box2 div').className = "overlay unactive"; 
-                document.querySelector('#box2').children[1].className = "h2hov active";                        
-                document.querySelector('#box2').children[2].className = "h2wow";                  
+                shutDownAssignClasses('#box2');
             },
             complete: function () {
                 box.state = 'down';
@@ -227,7 +198,6 @@ function shutBoxDown(box) {
 
     if (box.id === '#box3') {
         anime.remove('#box3');
-        // where's the end of the screen?
 
         anime({
             targets: ['#box3'],
@@ -240,9 +210,7 @@ function shutBoxDown(box) {
             ],
             autoplay: true,
             begin: function () {
-                document.querySelector('#box3 div').className = "overlay unactive";
-                document.querySelector('#box3').children[1].className = "h2hov active";                        
-                document.querySelector('#box3').children[2].className = "h2wow";                   
+                shutDownAssignClasses('#box3');
             },
             complete: function () {
                 box.state = 'down';
@@ -254,7 +222,6 @@ function shutBoxDown(box) {
 
     if (box.id === '#box4') {
         anime.remove('#box4');
-        // where's the end of the screen?
 
         anime({
             targets: ['#box4'],
@@ -272,9 +239,8 @@ function shutBoxDown(box) {
             autoplay: true,
             duration: 2000,
             begin: function () {
-                document.querySelector('#box4 div').className = "overlay unactive";
-                document.querySelector('#box4').children[1].className = "h2hov active";                        
-                document.querySelector('#box4').children[2].className = "h2wow";               },
+                shutDownAssignClasses('#box4');
+            },
             complete: function () {
                 box.state = 'down';
                 document.querySelector(box.id).style.transformOrigin = '0% 100%';
@@ -314,9 +280,8 @@ function shutBoxDown(box) {
             ],
             autoplay: true,
             begin: function () {
-                document.querySelector('#box5 div').className = "overlay unactive";
-                document.querySelector('#box5').children[1].className = "h2hov active";                        
-                document.querySelector('#box5').children[2].className = "h2wow";               },
+                shutDownAssignClasses('#box5');
+            },
             complete: function () {
                 box.state = 'down';
                 document.querySelector(box.id).style.transformOrigin = '0% 100%';
@@ -324,4 +289,16 @@ function shutBoxDown(box) {
 
         });
     }
+}
+
+function shutDownAssignClasses(id) {
+    document.querySelector(id + ' div').className = "overlay unactive";
+    document.querySelector(id).children[1].className = "h2hov active";
+    document.querySelector(id).children[2].className = "h2wow";
+}
+
+function riseUpAssignClasses(element_reference) {
+    element_reference.children[0].className = "overlay";
+    element_reference.children[1].className = "h2hov";
+    element_reference.children[2].className = "h2wow active";
 }
