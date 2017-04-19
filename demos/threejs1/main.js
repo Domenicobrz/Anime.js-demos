@@ -67,7 +67,7 @@ function pageInit() {
     var obj = {
         t: 0,
         extension: 1.1,
-        rotation: 2.2
+        rotation: 2
     };
 
 
@@ -88,9 +88,6 @@ function pageInit() {
                                                        op[1] + op[1] * t * obj.extension,
                                                        op[2] + op[2] * t * obj.extension);
 
-                        // scene.children[i].rotation.x = t * op[0] * obj.rotation;
-                        // scene.children[i].rotation.y = t * op[1] * obj.rotation;
-                        // scene.children[i].rotation.z = t * op[2] * obj.rotation;   
                         var axis = new THREE.Vector3(op[0], op[1], op[2]).normalize();                     
                         scene.children[i].setRotationFromAxisAngle(axis, obj.t * obj.rotation);
                     }
