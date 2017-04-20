@@ -19,13 +19,13 @@ function pageInit() {
     camera.position.x = 200;
     camera.position.y = 200;
     camera.position.z = 200;
-    // window.controls = new THREE.OrbitControls(camera, renderer.domElement);
+    window.controls = new THREE.OrbitControls(camera, renderer.domElement);
 
     scene = new THREE.Scene();
 
 
     var size = 50;
-    var hsize = size / 2;
+    var hsize = size / 1.8;
     var positions = [
         [-hsize, -hsize, -hsize],
         [+hsize, -hsize, -hsize],
@@ -41,13 +41,20 @@ function pageInit() {
 
 
     for (var i = 0; i < positions.length; i++) {
+        var r = Math.random();
+        var gb = Math.random();
+        r = r < gb ? gb : r;
+
         var geometry = new THREE.BoxGeometry(size, size, size);
-        var mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({ color: new THREE.Color(Math.random(), Math.random(), Math.random()) }));
+        var mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({ color: new THREE.Color(r, gb, gb), transparent: true, opacity: 1 }));
         mesh.position.set(positions[i][0], positions[i][1], positions[i][2]);
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         scene.add(mesh);
     }
+
+
+
 
 
 
@@ -117,6 +124,32 @@ function pageInit() {
                 }
             });
         }
+
+
+
+        if (e.key == "c") {
+            var y = 0;
+            var vec = new THREE.Vector3();
+            vec.copy(scene.children[3].position);
+            console.log(vec);
+
+            var lookAtVector = new THREE.Vector3(camera.matrix.elements[8], camera.matrix.elements[9], camera.matrix.elements[10]);
+            lookAtVector.normalize();
+
+            var cameraX = new THREE.Vector3(camera.matrix.elements[0], camera.matrix.elements[1], camera.matrix.elements[2]);
+            cameraX.normalize();
+
+            var cameray = new THREE.Vector3(camera.matrix.elements[4], camera.matrix.elements[5], camera.matrix.elements[6]);
+            cameray.normalize();
+
+
+            console.log(lookAtVector);
+            console.log(cameraX);
+            console.log(cameray);
+
+            // vec.add(cameraX);
+            scene.children[3].position.add(cameraX);
+        }
     });
 
 
@@ -127,6 +160,6 @@ function animate(now) {
     requestAnimationFrame(animate);
 
     camera.lookAt(scene.position);
-    // controls.update();
+    controls.update();
     renderer.render(scene, camera);
 }
