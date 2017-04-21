@@ -2,6 +2,12 @@ window.addEventListener('load', pageInit);
 
 var container;
 var camera, scene, renderer;
+var raycaster = new THREE.Raycaster();
+var mouse = new THREE.Vector2();
+var boxes = [];
+var currentlySelectedObject;
+var triggerRaycastUpdate = false;
+
 
 function pageInit() {
 
@@ -16,9 +22,10 @@ function pageInit() {
     container.appendChild(renderer.domElement);
 
     camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 4500);
-    camera.position.x = 200;
-    camera.position.y = 200;
-    camera.position.z = 200;
+    var cameraVec = (new THREE.Vector3(1, 1, 1)).normalize();
+    camera.position.x = cameraVec.x * 350;
+    camera.position.y = cameraVec.y * 350;
+    camera.position.z = cameraVec.z * 350;
     window.controls = new THREE.OrbitControls(camera, renderer.domElement);
 
     scene = new THREE.Scene();
@@ -40,6 +47,8 @@ function pageInit() {
     ];
 
 
+
+
     for (var i = 0; i < positions.length; i++) {
         var r = Math.random();
         var gb = Math.random();
@@ -51,9 +60,9 @@ function pageInit() {
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         scene.add(mesh);
+
+        boxes.push({ mesh: mesh, position: positions[i], sceneIndex: scene.children.length - 1, color: new THREE.Color(r, gb, gb) });
     }
-
-
 
 
 
@@ -62,21 +71,20 @@ function pageInit() {
     var light = new THREE.PointLight(0xffffff, 2, 1000);
     light.position.set(100, 100, 100);
     light.castShadow = true;
-    light.shadow.mapSize.width  = 512;
+    light.shadow.mapSize.width = 512;
     light.shadow.mapSize.height = 512;
     scene.add(light);
 
-    var ambient = new THREE.AmbientLight( 0x222222 ); // soft white light
-    scene.add( ambient );
+    var ambient = new THREE.AmbientLight(0x222222); // soft white light
+    scene.add(ambient);
 
-    scene.background = new THREE.Color( 0x222222 );
+    scene.background = new THREE.Color(0x222222);
 
     var obj = {
         t: 0,
         extension: 1.1,
         rotation: 2
     };
-
 
     window.addEventListener('keydown', function (e) {
         if (e.key == "k") {
@@ -87,15 +95,15 @@ function pageInit() {
                 elasticity: 650,
                 duration: 2500,
                 update: function (anim) {
-                    for(var i = 0, l = scene.children.length - 2; i < l; i++) {
+                    for (var i = 0, l = scene.children.length - 2; i < l; i++) {
                         var t = obj.t;
-                        
+
                         var op = positions[i];
                         scene.children[i].position.set(op[0] + op[0] * t * obj.extension,
-                                                       op[1] + op[1] * t * obj.extension,
-                                                       op[2] + op[2] * t * obj.extension);
+                            op[1] + op[1] * t * obj.extension,
+                            op[2] + op[2] * t * obj.extension);
 
-                        var axis = new THREE.Vector3(op[0], op[1], op[2]).normalize();                     
+                        var axis = new THREE.Vector3(op[0], op[1], op[2]).normalize();
                         scene.children[i].setRotationFromAxisAngle(axis, obj.t * obj.rotation);
                     }
                 }
@@ -103,22 +111,22 @@ function pageInit() {
         }
 
         if (e.key == "l") {
-            anime.remove(obj);            
+            anime.remove(obj);
             anime({
                 targets: obj,
                 t: 0,
                 easing: 'easeInOutCubic',
                 duration: 400,
                 update: function (anim) {
-                    for(var i = 0, l = scene.children.length - 2; i < l; i++) {
+                    for (var i = 0, l = scene.children.length - 2; i < l; i++) {
                         var t = obj.t;
-                        
+
                         var op = positions[i];
                         scene.children[i].position.set(op[0] + op[0] * t * obj.extension,
-                                                       op[1] + op[1] * t * obj.extension,
-                                                       op[2] + op[2] * t * obj.extension);
+                            op[1] + op[1] * t * obj.extension,
+                            op[2] + op[2] * t * obj.extension);
 
-                        var axis = new THREE.Vector3(op[0], op[1], op[2]).normalize();                     
+                        var axis = new THREE.Vector3(op[0], op[1], op[2]).normalize();
                         scene.children[i].setRotationFromAxisAngle(axis, obj.t * obj.rotation);
                     }
                 }
@@ -143,23 +151,74 @@ function pageInit() {
             cameray.normalize();
 
 
-            console.log(lookAtVector);
-            console.log(cameraX);
-            console.log(cameray);
-
-            // vec.add(cameraX);
             scene.children[3].position.add(cameraX);
         }
     });
 
 
+
+    window.addEventListener('mousemove', onMouseMove, false);
+
     animate(0);
 }
 
+
 function animate(now) {
     requestAnimationFrame(animate);
+
+
+
+    if (triggerRaycastUpdate) {
+        // update the picking ray with the camera and mouse position
+        raycaster.setFromCamera(mouse, camera);
+        // calculate objects intersecting the picking ray
+        var intersects = raycaster.intersectObjects(scene.children);
+
+        for (var i = 0; i < boxes.length; i++) {
+            boxes[i].mesh.material.color.set(boxes[i].color);
+        }
+
+        currentlySelectedObject = undefined;
+        for (var i = 0; i < intersects.length; i++) {
+            intersects[i].object.material.color.set(0xffffff);
+            currentlySelectedObject = intersects[i].object;
+            break;
+        }
+
+        triggerRaycastUpdate = false;
+    }
+
+
+
 
     camera.lookAt(scene.position);
     controls.update();
     renderer.render(scene, camera);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function onMouseMove(event) {
+    // calculate mouse position in normalized device coordinates
+    // (-1 to +1) for both components
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    triggerRaycastUpdate = true;
+}
+
