@@ -23,9 +23,11 @@ function pageInit() {
 
     camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 4500);
     var cameraVec = (new THREE.Vector3(1, 1, 1)).normalize();
-    camera.position.x = cameraVec.x * 350;
-    camera.position.y = cameraVec.y * 350;
-    camera.position.z = cameraVec.z * 350;
+    // camera.position.x = cameraVec.x * 350;
+    // camera.position.y = cameraVec.y * 350;
+    // camera.position.z = cameraVec.z * 350;
+    camera.up = new THREE.Vector3(0, 1, 0);
+    camera.position.z = 350;
     window.controls = new THREE.OrbitControls(camera, renderer.domElement);
 
     scene = new THREE.Scene();
@@ -51,7 +53,7 @@ function pageInit() {
 
     for (var i = 0; i < positions.length; i++) {
         var r = Math.random();
-        var gb = Math.random();
+        var gb = Math.random() * 0.3;
         r = r < gb ? gb : r;
 
         var geometry = new THREE.BoxGeometry(size, size, size);
@@ -132,32 +134,12 @@ function pageInit() {
                 }
             });
         }
-
-
-
-        if (e.key == "c") {
-            var y = 0;
-            var vec = new THREE.Vector3();
-            vec.copy(scene.children[3].position);
-            console.log(vec);
-
-            var lookAtVector = new THREE.Vector3(camera.matrix.elements[8], camera.matrix.elements[9], camera.matrix.elements[10]);
-            lookAtVector.normalize();
-
-            var cameraX = new THREE.Vector3(camera.matrix.elements[0], camera.matrix.elements[1], camera.matrix.elements[2]);
-            cameraX.normalize();
-
-            var cameray = new THREE.Vector3(camera.matrix.elements[4], camera.matrix.elements[5], camera.matrix.elements[6]);
-            cameray.normalize();
-
-
-            scene.children[3].position.add(cameraX);
-        }
     });
 
 
 
     window.addEventListener('mousemove', onMouseMove, false);
+    window.addEventListener('click', onClick);
 
     animate(0);
 }
@@ -222,3 +204,94 @@ function onMouseMove(event) {
     triggerRaycastUpdate = true;
 }
 
+function onClick(event) {
+
+    if (currentlySelectedObject !== undefined) {
+
+        var objPosNorm = new THREE.Vector3();
+        objPosNorm.copy(currentlySelectedObject.position);
+        objPosNorm.normalize();
+
+        var cameraPosNorm = new THREE.Vector3();
+        cameraPosNorm.copy(camera.position);
+        cameraPosNorm.normalize();
+
+
+        var cross = new THREE.Vector3();
+        cross.copy(objPosNorm);
+        cross.cross(cameraPosNorm);
+        cross.normalize();
+
+        var radians = Math.acos(objPosNorm.dot(cameraPosNorm));
+
+        
+        // var quat1 = new THREE.Quaternion();
+        // quat1.set( objPosNorm.x, objPosNorm.y, objPosNorm.z, 0 );
+        // var quat2 = new THREE.Quaternion();
+        // quat2.set( cameraPosNorm.x, cameraPosNorm.y, cameraPosNorm.z, 0 );
+
+        var dummyquat = new THREE.Quaternion();
+        var dummyvec  = new THREE.Vector3();
+        var dummyvec2  = new THREE.Vector3();
+        var oldCameraPosition = new THREE.Vector3();
+        oldCameraPosition.copy(camera.position);
+        var oldCameraUp = new THREE.Vector3();
+        oldCameraUp.copy(camera.up);
+
+        var obj = { t: 0 };
+        anime({
+            targets: obj,
+            t: 1,
+            easing: 'easeInOutCubic',
+            duration: 800,
+            update: function (anim) {
+                // dummyquat.copy(quat1);
+                // dummyquat.slerp(quat2, obj.t);
+                dummyquat.setFromAxisAngle(cross, -obj.t * radians);
+
+                dummyvec.copy(oldCameraPosition);
+                dummyvec.normalize();
+                dummyvec.applyQuaternion(dummyquat);
+                dummyvec.normalize();
+
+                dummyvec2.copy(oldCameraUp);
+                dummyvec2.normalize();
+                dummyvec2.applyQuaternion(dummyquat);
+                dummyvec2.normalize();
+                
+
+                // var vec1 = new THREE.Vector3(-dummyvec.x, -dummyvec.y, -dummyvec.z);
+                // var vec2 = new THREE.Vector3(1, 0, 0);
+                // vec2.cross(vec1);
+                // vec2.normalize();
+                // camera.up.copy(vec2);
+
+                camera.position.x = dummyvec.x * 350;
+                camera.position.y = dummyvec.y * 350;
+                camera.position.z = dummyvec.z * 350;
+                camera.up.copy(dummyvec2);
+
+                // camera.position.x = dummyquat.x * 350;
+                // camera.position.y = dummyquat.y * 350;
+                // camera.position.z = dummyquat.z * 350;
+            }
+         });
+
+
+        // var y = 0;
+        // var vec = new THREE.Vector3();
+        // vec.copy(scene.children[3].position);
+        // console.log(vec);
+
+        // var lookAtVector = new THREE.Vector3(camera.matrix.elements[8], camera.matrix.elements[9], camera.matrix.elements[10]);
+        // lookAtVector.normalize();
+
+        // var cameraX = new THREE.Vector3(camera.matrix.elements[0], camera.matrix.elements[1], camera.matrix.elements[2]);
+        // cameraX.normalize();
+
+        // var cameray = new THREE.Vector3(camera.matrix.elements[4], camera.matrix.elements[5], camera.matrix.elements[6]);
+        // cameray.normalize();
+
+        // scene.children[3].position.add(cameraX);
+    }
+}
