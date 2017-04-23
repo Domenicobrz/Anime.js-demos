@@ -70,7 +70,7 @@ function pageInit() {
 
 
     // adding light as the last object of this scene
-    var light = new THREE.PointLight(0xffffff, 2, 1000);
+    window.light = new THREE.PointLight(0xffffff, 2, 1000);
     light.position.set(100, 100, 100);
     light.castShadow = true;
     light.shadow.mapSize.width = 512;
@@ -102,8 +102,8 @@ function pageInit() {
 
                         var op = positions[i];
                         scene.children[i].position.set(op[0] + op[0] * t * obj.extension,
-                            op[1] + op[1] * t * obj.extension,
-                            op[2] + op[2] * t * obj.extension);
+                                                       op[1] + op[1] * t * obj.extension,
+                                                       op[2] + op[2] * t * obj.extension);
 
                         var axis = new THREE.Vector3(op[0], op[1], op[2]).normalize();
                         scene.children[i].setRotationFromAxisAngle(axis, obj.t * obj.rotation);
@@ -125,11 +125,59 @@ function pageInit() {
 
                         var op = positions[i];
                         scene.children[i].position.set(op[0] + op[0] * t * obj.extension,
-                            op[1] + op[1] * t * obj.extension,
-                            op[2] + op[2] * t * obj.extension);
+                                                       op[1] + op[1] * t * obj.extension,
+                                                       op[2] + op[2] * t * obj.extension);
 
                         var axis = new THREE.Vector3(op[0], op[1], op[2]).normalize();
                         scene.children[i].setRotationFromAxisAngle(axis, obj.t * obj.rotation);
+                    }
+                }
+            });
+        }
+
+
+        if (e.key == "g") {
+            anime.remove(obj);
+            anime({
+                targets: obj,
+                t: 1,
+                easing: 'easeInOutCubic',
+                duration: 400,
+                update: function (anim) {
+                    for (var i = 0, l = scene.children.length - 2; i < l; i++) {
+                        var t = obj.t;
+
+                        var op = positions[i];
+
+                        var axis = new THREE.Vector3(op[0], op[1], op[2]).normalize();
+                        var quat1 = new THREE.Quaternion();
+                        quat1.setFromAxisAngle(axis, obj.t * obj.rotation);
+
+                        // camera's X Vector
+                        var cameraX = new THREE.Vector3();
+                        cameraX.set(
+                            camera.matrix.elements[0],
+                            camera.matrix.elements[1],
+                            camera.matrix.elements[2]
+                        );
+                        var quat2 = new THREE.Quaternion();
+                        quat2.setFromAxisAngle(cameraX, obj.t);
+
+
+
+                        // camera matrix ha 3 assi, che hanno ruotato la scena, trova 
+                        // l'anti rotazione della matrice che ruota la scena e dovresti trovare il modo di interpolare da lì
+                        // forse usando quaternion.setFromRotationMatrix
+
+
+
+
+
+
+
+                        quat1.slerp(quat2, obj.t);
+                        scene.children[i].quaternion.copy(quat2);
+                        // scene.children[i].setRotationFromAxisAngle(axis, obj.t * obj.rotation);
                     }
                 }
             });
@@ -140,6 +188,11 @@ function pageInit() {
 
     window.addEventListener('mousemove', onMouseMove, false);
     window.addEventListener('click', onClick);
+
+
+    currentlySelectedObject = boxes[7].mesh;
+    onClick();
+
 
     animate(0);
 }
@@ -170,8 +223,8 @@ function animate(now) {
         triggerRaycastUpdate = false;
     }
 
-
-
+    
+    light.position.set(camera.position.x * 0.5, camera.position.y * 0.5, camera.position.z * 0.5);
 
     camera.lookAt(scene.position);
     controls.update();
@@ -224,11 +277,6 @@ function onClick(event) {
 
         var radians = Math.acos(objPosNorm.dot(cameraPosNorm));
 
-        
-        // var quat1 = new THREE.Quaternion();
-        // quat1.set( objPosNorm.x, objPosNorm.y, objPosNorm.z, 0 );
-        // var quat2 = new THREE.Quaternion();
-        // quat2.set( cameraPosNorm.x, cameraPosNorm.y, cameraPosNorm.z, 0 );
 
         var dummyquat = new THREE.Quaternion();
         var dummyvec  = new THREE.Vector3();
@@ -245,8 +293,6 @@ function onClick(event) {
             easing: 'easeInOutCubic',
             duration: 800,
             update: function (anim) {
-                // dummyquat.copy(quat1);
-                // dummyquat.slerp(quat2, obj.t);
                 dummyquat.setFromAxisAngle(cross, -obj.t * radians);
 
                 dummyvec.copy(oldCameraPosition);
@@ -270,28 +316,7 @@ function onClick(event) {
                 camera.position.y = dummyvec.y * 350;
                 camera.position.z = dummyvec.z * 350;
                 camera.up.copy(dummyvec2);
-
-                // camera.position.x = dummyquat.x * 350;
-                // camera.position.y = dummyquat.y * 350;
-                // camera.position.z = dummyquat.z * 350;
             }
          });
-
-
-        // var y = 0;
-        // var vec = new THREE.Vector3();
-        // vec.copy(scene.children[3].position);
-        // console.log(vec);
-
-        // var lookAtVector = new THREE.Vector3(camera.matrix.elements[8], camera.matrix.elements[9], camera.matrix.elements[10]);
-        // lookAtVector.normalize();
-
-        // var cameraX = new THREE.Vector3(camera.matrix.elements[0], camera.matrix.elements[1], camera.matrix.elements[2]);
-        // cameraX.normalize();
-
-        // var cameray = new THREE.Vector3(camera.matrix.elements[4], camera.matrix.elements[5], camera.matrix.elements[6]);
-        // cameray.normalize();
-
-        // scene.children[3].position.add(cameraX);
     }
 }
