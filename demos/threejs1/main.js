@@ -137,46 +137,51 @@ function pageInit() {
 
 
         if (e.key == "g") {
+            obj.t = 0;
             anime.remove(obj);
             anime({
                 targets: obj,
-                t: 1,
+                t: [0, 1],
                 easing: 'easeInOutCubic',
                 duration: 400,
                 update: function (anim) {
                     for (var i = 0, l = scene.children.length - 2; i < l; i++) {
-                        var t = obj.t;
+                        var t = Number(obj.t);
+                        var rot = Number(obj.rotation);
 
                         var op = positions[i];
 
                         var axis = new THREE.Vector3(op[0], op[1], op[2]).normalize();
                         var quat1 = new THREE.Quaternion();
-                        quat1.setFromAxisAngle(axis, obj.t * obj.rotation);
+                        //quat1.setFromAxisAngle(axis, t * rot);
+                        quat1.copy(scene.children[i].quaternion);
 
-                        // camera's X Vector
-                        var cameraX = new THREE.Vector3();
-                        cameraX.set(
-                            camera.matrix.elements[0],
-                            camera.matrix.elements[1],
-                            camera.matrix.elements[2]
-                        );
+
+                        // // camera's X Vector
+                        // var cameraX = new THREE.Vector3();
+                        // cameraX.set(
+                        //     camera.matrix.elements[0],
+                        //     camera.matrix.elements[1],
+                        //     camera.matrix.elements[2]
+                        // );
+                        
+                        // // camera matrix ha 3 assi, che hanno ruotato la scena, trova 
+                        // // l'anti rotazione della matrice che ruota la scena e dovresti trovare il modo di interpolare da lì
+                        // // forse usando quaternion.setFromRotationMatrix
+                        // var invMatrix = new THREE.Matrix4();
+                        // invMatrix.getInverse(camera.matrix);
+                        // invMatrix.elements[12] = 0;
+                        // invMatrix.elements[13] = 0;
+                        // invMatrix.elements[14] = 0;
+                        // invMatrix.elements[15] = 1;
+
                         var quat2 = new THREE.Quaternion();
-                        quat2.setFromAxisAngle(cameraX, obj.t);
+                        // I expected the inverse matrix to make it, but apparently the matrix itself will do it
+                        quat2.setFromRotationMatrix(camera.matrix);
 
 
-
-                        // camera matrix ha 3 assi, che hanno ruotato la scena, trova 
-                        // l'anti rotazione della matrice che ruota la scena e dovresti trovare il modo di interpolare da lì
-                        // forse usando quaternion.setFromRotationMatrix
-
-
-
-
-
-
-
-                        quat1.slerp(quat2, obj.t);
-                        scene.children[i].quaternion.copy(quat2);
+                        quat1.slerp(quat2, t);
+                        scene.children[i].quaternion.copy(quat1);
                         // scene.children[i].setRotationFromAxisAngle(axis, obj.t * obj.rotation);
                     }
                 }
