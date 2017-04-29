@@ -7,6 +7,7 @@ var mouse = new THREE.Vector2();
 var boxes = [];
 var currentlySelectedObject;
 var triggerRaycastUpdate = false;
+var alterLightPosition   = false;
 
 
 function pageInit() {
@@ -137,17 +138,33 @@ function pageInit() {
 
 
         if (e.key == "g") {
-            obj.t = 0;
-            anime.remove(obj);
+            window.removeEventListener('mousemove', onMouseMove, false);
+            window.removeEventListener('click', onClick, false);
+
+            var obj2 = {
+                origx: camera.position.x, 
+                origy: camera.position.y, 
+                origz: camera.position.z,
+                t: 0,
+                rotation: 2.2
+            };
+
             anime({
-                targets: obj,
+                targets: obj2,
                 t: [0, 1],
                 easing: 'easeInOutCubic',
-                duration: 400,
+                duration: 800,
+                begin: function() {
+                    alterLightPosition = true;
+                    // resetting the boxes color
+                    for (var i = 0; i < boxes.length; i++) {
+                        boxes[i].mesh.material.color.set(boxes[i].color);
+                    }
+                },
                 update: function (anim) {
                     for (var i = 0, l = scene.children.length - 2; i < l; i++) {
-                        var t = Number(obj.t);
-                        var rot = Number(obj.rotation);
+                        var t = Number(obj2.t);
+                        var rot = Number(obj2.rotation);
 
                         var op = positions[i];
 
@@ -175,14 +192,31 @@ function pageInit() {
                         // invMatrix.elements[14] = 0;
                         // invMatrix.elements[15] = 1;
 
+                        var rotMatrix = new THREE.Matrix4();
+                        rotMatrix.makeRotationZ(Math.PI / 4);
+
+                        var compound = new THREE.Matrix4();
+                        compound.copy(camera.matrix);
+
+                        compound.multiply(rotMatrix);
+
                         var quat2 = new THREE.Quaternion();
                         // I expected the inverse matrix to make it, but apparently the matrix itself will do it
-                        quat2.setFromRotationMatrix(camera.matrix);
+                        quat2.setFromRotationMatrix(compound);
 
 
                         quat1.slerp(quat2, t);
                         scene.children[i].quaternion.copy(quat1);
-                        // scene.children[i].setRotationFromAxisAngle(axis, obj.t * obj.rotation);
+
+                        
+                        // converging the camera closer to the center
+                        camera.position.x = obj2.origx * (1.0 - 0.62 * t);
+                        camera.position.y = obj2.origy * (1.0 - 0.62 * t);
+                        camera.position.z = obj2.origz * (1.0 - 0.62 * t);
+
+                        light.position.x = obj2.origx * 0.5 * (1.0 + 3.5 * t);
+                        light.position.y = obj2.origy * 0.5 * (1.0 + 3.5 * t);
+                        light.position.z = obj2.origz * 0.5 * (1.0 + 3.5 * t);
                     }
                 }
             });
@@ -228,8 +262,8 @@ function animate(now) {
         triggerRaycastUpdate = false;
     }
 
-    
-    light.position.set(camera.position.x * 0.5, camera.position.y * 0.5, camera.position.z * 0.5);
+    if(!alterLightPosition)
+        light.position.set(camera.position.x * 0.5, camera.position.y * 0.5, camera.position.z * 0.5);
 
     camera.lookAt(scene.position);
     controls.update();
