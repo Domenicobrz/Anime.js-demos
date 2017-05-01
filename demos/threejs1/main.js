@@ -8,7 +8,7 @@ var boxes = [];
 var currentlySelectedObject;
 var triggerRaycastUpdate = false;
 var alterLightPosition   = false;
-
+var animExpandingContracting = false;
 
 function pageInit() {
 
@@ -36,7 +36,7 @@ function pageInit() {
 
     var size = 50;
     var hsize = size / 1.8;
-    var positions = [
+    window.positions = [
         [-hsize, -hsize, -hsize],
         [+hsize, -hsize, -hsize],
         [-hsize, +hsize, -hsize],
@@ -83,57 +83,14 @@ function pageInit() {
 
     scene.background = new THREE.Color(0x222222);
 
-    var obj = {
-        t: 0,
-        extension: 1.1,
-        rotation: 2
-    };
 
     window.addEventListener('keydown', function (e) {
         if (e.key == "k") {
-            anime.remove(obj);
-            anime({
-                targets: obj,
-                t: 1,
-                elasticity: 650,
-                duration: 2500,
-                update: function (anim) {
-                    for (var i = 0, l = scene.children.length - 2; i < l; i++) {
-                        var t = obj.t;
-
-                        var op = positions[i];
-                        scene.children[i].position.set(op[0] + op[0] * t * obj.extension,
-                                                       op[1] + op[1] * t * obj.extension,
-                                                       op[2] + op[2] * t * obj.extension);
-
-                        var axis = new THREE.Vector3(op[0], op[1], op[2]).normalize();
-                        scene.children[i].setRotationFromAxisAngle(axis, obj.t * obj.rotation);
-                    }
-                }
-            });
-        }
+            animateExpand();
+        }   
 
         if (e.key == "l") {
-            anime.remove(obj);
-            anime({
-                targets: obj,
-                t: 0,
-                easing: 'easeInOutCubic',
-                duration: 400,
-                update: function (anim) {
-                    for (var i = 0, l = scene.children.length - 2; i < l; i++) {
-                        var t = obj.t;
-
-                        var op = positions[i];
-                        scene.children[i].position.set(op[0] + op[0] * t * obj.extension,
-                                                       op[1] + op[1] * t * obj.extension,
-                                                       op[2] + op[2] * t * obj.extension);
-
-                        var axis = new THREE.Vector3(op[0], op[1], op[2]).normalize();
-                        scene.children[i].setRotationFromAxisAngle(axis, obj.t * obj.rotation);
-                    }
-                }
-            });
+            animateContract();            
         }
 
 
@@ -141,85 +98,7 @@ function pageInit() {
             window.removeEventListener('mousemove', onMouseMove, false);
             window.removeEventListener('click', onClick, false);
 
-            var obj2 = {
-                origx: camera.position.x, 
-                origy: camera.position.y, 
-                origz: camera.position.z,
-                t: 0,
-                rotation: 2.2
-            };
-
-            anime({
-                targets: obj2,
-                t: [0, 1],
-                easing: 'easeInOutCubic',
-                duration: 800,
-                begin: function() {
-                    alterLightPosition = true;
-                    // resetting the boxes color
-                    for (var i = 0; i < boxes.length; i++) {
-                        boxes[i].mesh.material.color.set(boxes[i].color);
-                    }
-                },
-                update: function (anim) {
-                    for (var i = 0, l = scene.children.length - 2; i < l; i++) {
-                        var t = Number(obj2.t);
-                        var rot = Number(obj2.rotation);
-
-                        var op = positions[i];
-
-                        var axis = new THREE.Vector3(op[0], op[1], op[2]).normalize();
-                        var quat1 = new THREE.Quaternion();
-                        //quat1.setFromAxisAngle(axis, t * rot);
-                        quat1.copy(scene.children[i].quaternion);
-
-
-                        // // camera's X Vector
-                        // var cameraX = new THREE.Vector3();
-                        // cameraX.set(
-                        //     camera.matrix.elements[0],
-                        //     camera.matrix.elements[1],
-                        //     camera.matrix.elements[2]
-                        // );
-                        
-                        // // camera matrix ha 3 assi, che hanno ruotato la scena, trova 
-                        // // l'anti rotazione della matrice che ruota la scena e dovresti trovare il modo di interpolare da lì
-                        // // forse usando quaternion.setFromRotationMatrix
-                        // var invMatrix = new THREE.Matrix4();
-                        // invMatrix.getInverse(camera.matrix);
-                        // invMatrix.elements[12] = 0;
-                        // invMatrix.elements[13] = 0;
-                        // invMatrix.elements[14] = 0;
-                        // invMatrix.elements[15] = 1;
-
-                        var rotMatrix = new THREE.Matrix4();
-                        rotMatrix.makeRotationZ(Math.PI / 4);
-
-                        var compound = new THREE.Matrix4();
-                        compound.copy(camera.matrix);
-
-                        compound.multiply(rotMatrix);
-
-                        var quat2 = new THREE.Quaternion();
-                        // I expected the inverse matrix to make it, but apparently the matrix itself will do it
-                        quat2.setFromRotationMatrix(compound);
-
-
-                        quat1.slerp(quat2, t);
-                        scene.children[i].quaternion.copy(quat1);
-
-                        
-                        // converging the camera closer to the center
-                        camera.position.x = obj2.origx * (1.0 - 0.62 * t);
-                        camera.position.y = obj2.origy * (1.0 - 0.62 * t);
-                        camera.position.z = obj2.origz * (1.0 - 0.62 * t);
-
-                        light.position.x = obj2.origx * 0.5 * (1.0 + 3.5 * t);
-                        light.position.y = obj2.origy * 0.5 * (1.0 + 3.5 * t);
-                        light.position.z = obj2.origz * 0.5 * (1.0 + 3.5 * t);
-                    }
-                }
-            });
+            animateSelected();
         }
     });
 
@@ -288,17 +167,54 @@ function animate(now) {
 
 
 function onMouseMove(event) {
+    if(expContrObj.status === 0) return;
+
     // calculate mouse position in normalized device coordinates
     // (-1 to +1) for both components
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
     triggerRaycastUpdate = true;
+
+
+    var radius = Math.floor(innerWidth * 0.25);
+    var x = event.clientX - innerWidth  / 2;
+    var y = event.clientY - innerHeight / 2;
+
+    var length = Math.sqrt(x*x + y*y);
+    if(length < radius && (expContrObj.animstatus === 2 || 
+                           expContrObj.animstatus === 0)) {
+        animateExpand();
+    }   
+
+    if(length > radius && (expContrObj.animstatus === 1 || 
+                           expContrObj.animstatus === 0)) {
+        animateContract();
+    }   
 }
 
+var lastSelectedObject = null;
 function onClick(event) {
-
     if (currentlySelectedObject !== undefined) {
+
+        if(currentlySelectedObject === lastSelectedObject) {
+            // if( expContrObj.status === 1                       &&    // if expanded
+            //     expContrObj.animstatus !== 3) {                      // and not currently rotating
+            
+            if( expContrObj.animstatus !== 3) {    // not currently rotating
+                
+                expContrObj.status = 0;
+                animateSelected();
+
+                // prevent the following animation to run
+                return;
+            }
+
+            // if the selected object is the same as before, no need to reanimate
+            return;
+        } 
+          
+        expContrObj.animstatus = 3;
 
         var objPosNorm = new THREE.Vector3();
         objPosNorm.copy(currentlySelectedObject.position);
@@ -331,6 +247,9 @@ function onClick(event) {
             t: 1,
             easing: 'easeInOutCubic',
             duration: 800,
+            complete: function() {
+                expContrObj.animstatus = 0;        
+            },
             update: function (anim) {
                 dummyquat.setFromAxisAngle(cross, -obj.t * radians);
 
@@ -357,5 +276,182 @@ function onClick(event) {
                 camera.up.copy(dummyvec2);
             }
          });
+
+
+         lastSelectedObject = currentlySelectedObject;
     }
+}
+
+
+
+
+
+
+
+
+var expContrObj = {
+    t: 0,
+    extension: 1.1,
+    rotation: 2,
+    status: 2,          // 0 = animation completed  1 = expanded,  2 = contracted
+    animstatus: 0       // 0 = idle,                1 = expanding, 2 = contracting, 3 = rotation animation when 
+                        //                                                              the cursor clicks a box
+};
+
+function animateExpand() {
+    var obj = expContrObj;
+    expContrObj.animstatus = 1;
+
+    anime.remove(obj);
+    anime({
+        targets: obj,
+        t: 1,
+        elasticity: 650,
+        duration: 2500,
+        complete: function() {
+            expContrObj.animstatus = 0;
+            obj.status = 1;
+        },
+        update: function (anim) {
+            for (var i = 0, l = scene.children.length - 2; i < l; i++) {
+                var t = obj.t;
+
+                var op = positions[i];
+                scene.children[i].position.set(op[0] + op[0] * t * obj.extension,
+                                               op[1] + op[1] * t * obj.extension,
+                                               op[2] + op[2] * t * obj.extension);
+
+                var axis = new THREE.Vector3(op[0], op[1], op[2]).normalize();
+                scene.children[i].setRotationFromAxisAngle(axis, obj.t * obj.rotation);
+            }
+        }
+    });
+}
+
+function animateContract() {
+    var obj = expContrObj;
+
+    expContrObj.animstatus = 2;
+
+    anime.remove(obj);
+    anime({
+        targets: obj,
+        t: 0,
+        easing: 'easeInOutCubic',
+        duration: 400,
+        complete: function() {
+            expContrObj.animstatus = 0;
+            
+            obj.status = 2;            
+        },
+        update: function (anim) {
+            for (var i = 0, l = scene.children.length - 2; i < l; i++) {
+                var t = obj.t;
+
+                var op = positions[i];
+                scene.children[i].position.set(op[0] + op[0] * t * obj.extension,
+                                               op[1] + op[1] * t * obj.extension,
+                                               op[2] + op[2] * t * obj.extension);
+
+                var axis = new THREE.Vector3(op[0], op[1], op[2]).normalize();
+                scene.children[i].setRotationFromAxisAngle(axis, obj.t * obj.rotation);
+            }
+        }
+    });
+}
+
+function animateSelected() {
+    var obj2 = {
+        origx: camera.position.x, 
+        origy: camera.position.y, 
+        origz: camera.position.z,
+        t: 0,
+        rotation: 2.2
+    };
+
+    anime.remove(expContrObj);
+    anime({
+        targets: obj2,
+        t: [0, 1],
+        easing: 'easeInOutCubic',
+        duration: 800,
+        begin: function() {
+            alterLightPosition = true;
+            // resetting the boxes color
+            for (var i = 0; i < boxes.length; i++) {
+                boxes[i].mesh.material.color.set(boxes[i].color);
+            }
+        },
+        update: function (anim) {
+            for (var i = 0, l = scene.children.length - 2; i < l; i++) {
+                var t = Number(obj2.t);
+                var rot = Number(obj2.rotation);
+
+                var op = positions[i];
+
+                var axis = new THREE.Vector3(op[0], op[1], op[2]).normalize();
+                var quat1 = new THREE.Quaternion();
+                //quat1.setFromAxisAngle(axis, t * rot);
+                quat1.copy(scene.children[i].quaternion);
+
+
+                // // camera's X Vector
+                // var cameraX = new THREE.Vector3();
+                // cameraX.set(
+                //     camera.matrix.elements[0],
+                //     camera.matrix.elements[1],
+                //     camera.matrix.elements[2]
+                // );
+                
+                // // camera matrix ha 3 assi, che hanno ruotato la scena, trova 
+                // // l'anti rotazione della matrice che ruota la scena e dovresti trovare il modo di interpolare da lì
+                // // forse usando quaternion.setFromRotationMatrix
+                // var invMatrix = new THREE.Matrix4();
+                // invMatrix.getInverse(camera.matrix);
+                // invMatrix.elements[12] = 0;
+                // invMatrix.elements[13] = 0;
+                // invMatrix.elements[14] = 0;
+                // invMatrix.elements[15] = 1;
+
+                var rotMatrix = new THREE.Matrix4();
+                rotMatrix.makeRotationZ(Math.PI / 4);
+
+                var compound = new THREE.Matrix4();
+                compound.copy(camera.matrix);
+
+                compound.multiply(rotMatrix);
+
+                var quat2 = new THREE.Quaternion();
+                // I expected the inverse matrix to make it, but apparently the matrix itself will do it
+                quat2.setFromRotationMatrix(compound);
+
+
+                quat1.slerp(quat2, t);
+                scene.children[i].quaternion.copy(quat1);
+
+                
+
+
+                /*
+                
+                    you should converge the camera closer to the OBJECT and not the center
+                    you should converge the camera closer to the OBJECT and not the center
+                    you should converge the camera closer to the OBJECT and not the center
+                    you should converge the camera closer to the OBJECT and not the center
+                
+                 */
+
+
+
+                // converging the camera closer to the center
+                camera.position.x = obj2.origx * (1.0 - 0.62 * t);
+                camera.position.y = obj2.origy * (1.0 - 0.62 * t);
+                camera.position.z = obj2.origz * (1.0 - 0.62 * t);
+
+                light.position.x = obj2.origx * 0.5 * (1.0 + 3.5 * t);
+                light.position.y = obj2.origy * 0.5 * (1.0 + 3.5 * t);
+                light.position.z = obj2.origz * 0.5 * (1.0 + 3.5 * t);
+            }
+        }
+    });
 }
