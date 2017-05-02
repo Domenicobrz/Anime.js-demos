@@ -382,6 +382,9 @@ function animateSelected() {
                 boxes[i].mesh.material.color.set(boxes[i].color);
             }
         },
+        complete: function() {
+            toggleAnimHeadings();
+        },
         update: function (anim) {
             for (var i = 0, l = scene.children.length - 2; i < l; i++) {
                 var t = Number(obj2.t);
@@ -438,6 +441,7 @@ function animateSelected() {
                     you should converge the camera closer to the OBJECT and not the center
                     you should converge the camera closer to the OBJECT and not the center
                     you should converge the camera closer to the OBJECT and not the center
+
                 
                  */
 
@@ -454,4 +458,8 @@ function animateSelected() {
             }
         }
     });
+}
+
+function toggleAnimHeadings() {
+    
 }

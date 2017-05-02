@@ -23,10 +23,10 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
+            font-family: Georgia;
         }
         
         p {
-            font-family: Georgia;
             text-align: center;
             color: #d8d8d8;
             letter-spacing: 0.2em;
@@ -40,6 +40,32 @@
             font-size: 0.77em;       
             color: #999;                 
         }
+
+        #animEndContainer {
+            position: absolute;
+            left: 0;    
+            top: 40%;
+            transform: translateY(-50%);
+            font-size: 4vw;
+            width: 100%;
+        }
+
+        #animEndContainer h1, #animEndContainer h2 {
+            text-align: center;
+            position: relative;
+            display: block;
+            font-weight: normal;
+            color: #bbb;
+        }
+
+        #animEndContainer h2 {
+            font-size: 3vw;            
+        }
+
+        span.no-spacing {
+            letter-spacing: 0;
+            margin-right: 0.65vw;
+        }
     </style>
 
 
@@ -47,7 +73,12 @@
 
 <body>
 
-    <p>Press K and L for awesomeness<br> <span>or click one of the boxes to focus<span></p>
+    <div id="animEndContainer">
+        <h1>Let's be honest</h1>
+        <h2><span class="no-spacing">...</span>anime.js is awesome</h2>
+    </div>
+
+    <p>Click one of the boxes to center the view onto it<br> <span>click the central box to toggle the final animation<span></p>
 
 </body>
 </html>
