@@ -29,7 +29,7 @@ function pageInit() {
     // camera.position.z = cameraVec.z * 350;
     camera.up = new THREE.Vector3(0, 1, 0);
     camera.position.z = 350;
-    window.controls = new THREE.OrbitControls(camera, renderer.domElement);
+    // window.controls = new THREE.OrbitControls(camera, renderer.domElement);
 
     scene = new THREE.Scene();
 
@@ -145,7 +145,7 @@ function animate(now) {
         light.position.set(camera.position.x * 0.5, camera.position.y * 0.5, camera.position.z * 0.5);
 
     camera.lookAt(scene.position);
-    controls.update();
+    // controls.update();
     renderer.render(scene, camera);
 }
 
@@ -193,8 +193,12 @@ function onMouseMove(event) {
     }   
 }
 
+var animEnded = false;
 var lastSelectedObject = null;
 function onClick(event) {
+    
+    if(animEnded) return;
+
     if (currentlySelectedObject !== undefined) {
 
         if(currentlySelectedObject === lastSelectedObject) {
@@ -206,6 +210,7 @@ function onClick(event) {
                 expContrObj.status = 0;
                 animateSelected();
 
+                animEnded = true;
                 // prevent the following animation to run
                 return;
             }
@@ -461,5 +466,21 @@ function animateSelected() {
 }
 
 function toggleAnimHeadings() {
-    
+    anime({
+        targets: '#animEndContainer *',
+        translateY: ['150%', '0%'],
+        delay: function(el, i, length) {
+            return 400 * i;
+        },
+        opacity: 1,
+        easing: 'easeOutCubic',
+        duration: 800
+    });
+
+    anime({
+        targets: 'p',
+        opacity: 0,
+        easing: 'easeOutCubic',
+        duration: 400
+    });
 }
